@@ -9,7 +9,7 @@
     "exposed-modules": [
         "Task.Middleware"
     ],
-    "native-modules": true,
+    "native-modules": false,
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0"
     },
