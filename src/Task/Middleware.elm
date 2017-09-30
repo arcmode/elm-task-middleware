@@ -30,8 +30,7 @@ Middleware units are designed to do work on some "payload" similarly as a reduce
 works on Redux applications.
 
     -- A middleware that does almost nothing looks like this.
-    Task.succeed "hello world"
-        |> next
+    \name -> end (Task.succeed "hello " ++ name)
 
 -}
 type alias Middleware x a =
