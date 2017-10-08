@@ -44,10 +44,12 @@ type Step a
     | End a
 
 
-{-| Represent the unexpected situation when we forget to call `end` in the sequence
+{-| Represent the unexpected situations when we forget to call `end` in the sequence or some middleware
+task failed
 -}
-type Error
+type Error a
     = NeverEnded
+    | Middleware a
 
 
 {-| Transform a `Task` into a return value for a middleware unit choosing to continue
@@ -73,7 +75,6 @@ end =
 {-| Connect a list of middleware units into a single task
 
     connect
-        (\_ -> "error!")
         [ (\n -> next (Task.succeed n))
         , (n -> end (Task.succeed (* n n)))
         ]
@@ -81,27 +82,27 @@ end =
 
 -}
 connect :
-    (Error -> x)
-    -> List (Middleware x a)
+    List (Middleware x a)
     -> a
-    -> Task.Task x a
-connect onError list payload =
+    -> Task.Task (Error x) a
+connect list payload =
     case list of
         [] ->
-            Task.fail (onError NeverEnded)
+            Task.fail NeverEnded
 
         first :: rest ->
             (first payload)
-                |> Task.andThen (handleStep onError rest)
+                |> Task.mapError Middleware
+                |> Task.andThen (handleStep rest)
 
 
 {-| Handles a middleware step choice by either connecting to the next unit or ending the run
 -}
-handleStep : (Error -> x) -> List (Middleware x a) -> Step a -> Task.Task x a
-handleStep onError list step =
+handleStep : List (Middleware x a) -> Step a -> Task.Task (Error x) a
+handleStep list step =
     case step of
         Next payload ->
-            connect onError list payload
+            connect list payload
 
         End payload ->
             Task.succeed payload
