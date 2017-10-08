@@ -15,11 +15,12 @@ Middleware units are designed to do work on some "payload" similarly as a reduce
     \name -> end (Task.succeed "hello " ++ name)
 
 
-### Error
+### Error a
 
-	type Error = NeverEnded
+	type Error a = NeverEnded
+                 | Middleware a
 
-Represent the unexpected situation when we forget to call `end` in the sequence
+Represent the unexpected situation when we forget to call `end` in the sequence or a middleware task failed
 
 ## Common Helpers
 
@@ -41,12 +42,11 @@ Map a failing middleware error to some other type of error
 
 ## Chaining Middleware
 
-### connect : (Error -> x) -> List (Middleware x a) -> a -> Task x a
+### connect : -> List (Middleware x a) -> a -> Task (Error x) a
 
 Connect a list of middleware units into a single task
 
     connect
-        (\_ -> "error!")
         [ (\n -> next (Task.succeed n))
         , (n -> end (Task.succeed (* n n)))
         ]
