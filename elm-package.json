@@ -1,5 +1,5 @@
 {
-    "version": "2.0.0",
+    "version": "3.0.0",
     "summary": "Task.Middleware, a sequence of tasks that can either continue or end.",
     "repository": "http://github.com/drojas/elm-task-middleware.git",
     "license": "BSD3",

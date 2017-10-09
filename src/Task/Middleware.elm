@@ -1,4 +1,4 @@
-module Task.Middleware exposing (Middleware, Error(..), connect, mapError, next, end)
+module Task.Middleware exposing (Middleware, Error(..), connect, middleware, mapError, next, end)
 
 {-| This library provides a middleware abstraction that can be used to
 run tasks in a pre-defined sequence.
@@ -17,6 +17,8 @@ run tasks in a pre-defined sequence.
 # Chaining Middleware
 
 @docs connect
+
+@docs middleware
 
 -}
 
@@ -72,20 +74,20 @@ end =
     Task.map End
 
 
-{-| Connect a list of middleware units into a single task
+{-| Merge a list of middleware units into a single task
 
-    connect
+    middleware
         [ (\n -> next (Task.succeed n))
         , (n -> end (Task.succeed (* n n)))
         ]
         2
 
 -}
-connect :
+middleware :
     List (Middleware x a)
     -> a
     -> Task.Task (Error x) a
-connect list payload =
+middleware list payload =
     case list of
         [] ->
             Task.fail NeverEnded
@@ -102,7 +104,7 @@ handleStep : List (Middleware x a) -> Step a -> Task.Task (Error x) a
 handleStep list step =
     case step of
         Next payload ->
-            connect list payload
+            middleware list payload
 
         End payload ->
             Task.succeed payload
@@ -113,3 +115,14 @@ handleStep list step =
 mapError : (x -> y) -> Middleware x a -> Middleware y a
 mapError err mid =
     mid >> Task.mapError err
+
+
+{-| Connect a task to another after a mapError to Middlware
+-}
+connect :
+    (a -> Task.Task (Error x) b)
+    -> Task.Task x a
+    -> Task.Task (Error x) b
+connect task =
+    Task.mapError Middleware
+        >> Task.andThen task

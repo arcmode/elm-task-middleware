@@ -1,7 +1,7 @@
 [
   {
     "name": "Task.Middleware",
-    "comment": " This library provides a middleware abstraction that can be used to\nrun tasks in a pre-defined sequence.\n\n\n# Definition\n\n@docs Middleware, Error\n\n\n# Common Helpers\n\n@docs next, end, mapError\n\n\n# Chaining Middleware\n\n@docs connect\n\n",
+    "comment": " This library provides a middleware abstraction that can be used to\nrun tasks in a pre-defined sequence.\n\n\n# Definition\n\n@docs Middleware, Error\n\n\n# Common Helpers\n\n@docs next, end, mapError\n\n\n# Chaining Middleware\n\n@docs connect\n\n@docs middleware\n\n",
     "aliases": [
       {
         "name": "Middleware",
@@ -37,8 +37,8 @@
     "values": [
       {
         "name": "connect",
-        "comment": " Connect a list of middleware units into a single task\n\n    connect\n        [ (\\n -> next (Task.succeed n))\n        , (n -> end (Task.succeed (* n n)))\n        ]\n        2\n\n",
-        "type": "List (Task.Middleware.Middleware x a) -> a -> Task.Task (Task.Middleware.Error x) a"
+        "comment": " Connect a task to another after a mapError to Middlware\n",
+        "type": "(a -> Task.Task (Task.Middleware.Error x) b) -> Task.Task x a -> Task.Task (Task.Middleware.Error x) b"
       },
       {
         "name": "end",
@@ -49,6 +49,11 @@
         "name": "mapError",
         "comment": " Map a failing middleware error to some other type of error\n",
         "type": "(x -> y) -> Task.Middleware.Middleware x a -> Task.Middleware.Middleware y a"
+      },
+      {
+        "name": "middleware",
+        "comment": " Merge a list of middleware units into a single task\n\n    middleware\n        [ (\\n -> next (Task.succeed n))\n        , (n -> end (Task.succeed (* n n)))\n        ]\n        2\n\n",
+        "type": "List (Task.Middleware.Middleware x a) -> a -> Task.Task (Task.Middleware.Error x) a"
       },
       {
         "name": "next",
